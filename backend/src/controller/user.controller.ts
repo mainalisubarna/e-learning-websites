@@ -1,21 +1,14 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
-import bcrypt from "bcrypt";
 import "dotenv/config";
 import jwt from "jsonwebtoken";
 
 export const addUser = async (req: Request, res: Response) => {
   try {
     let data = req.body;
-    const { email, phoneNumber } = data;
-    const existingUser = await User.findOne({
-      $or: [{ phoneNumber }, { email }],
-    });
+    const { email } = data;
+    const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      const { password } = data;
-      const saltRound: any = process.env.BCRYPT_SALT_ROUND;
-      const salt = await bcrypt.genSalt(saltRound);
-      data.password = await bcrypt.hash(password, salt);
       const newUser = await User.create(data);
       res.status(200).json({
         status: true,
@@ -38,42 +31,47 @@ export const addUser = async (req: Request, res: Response) => {
 
 export const processLogin = async (req: Request, res: Response) => {
   try {
-    const { email } = req.body;
-    const pass = req.body.password;
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (user) {
-      const { password }: any = user;
-      const isVerifiedUser = await bcrypt.compare(pass, password);
-      if (isVerifiedUser) {
-        const JWT_SECRET_KEY: any = process.env.JWT_SECRET_KEY;
-        const jwtToken = jwt.sign({ id: user._id }, JWT_SECRET_KEY, {
+
+    if (!user) {
+      return res.status(401).json({
+        status: false,
+        message: "Invalid email or password",
+      });
+    } else {
+      const matchedPassword = await user.matchPassword(password);
+      if (matchedPassword) {
+        const secretKey = process.env.JWT_SECRET_KEY ?? "";
+        const token = jwt.sign({ id: user.email }, secretKey, {
           expiresIn: "7d",
         });
         const updatedUser: any = await User.findOneAndUpdate(
           { _id: user._id },
           {
-            $set: { jwt: jwtToken },
+            $set: { jwt: token },
           },
           {
             new: true,
           }
         );
-        res.status(200).json({
+
+        return res.status(200).json({
           status: true,
           data: updatedUser.jwt,
           message: "User logged in successfully",
         });
+      } else {
+        return res.status(401).json({
+          status: false,
+          message: "Invalid email or password",
+        });
       }
-    } else {
-      res.status(401).json({
-        status: false,
-        message: "Incorrect email or password",
-      });
     }
   } catch (error: any) {
-    res.status(500).json({
+    res.status(400).json({
       status: false,
-      message: error.message,
+      error: error.message,
     });
   }
 };

@@ -12,8 +12,10 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import SignInWithGoogle from "../components/SignInWithGoogle";
-import { POST_API } from "../services/postApi";
+import SignInWithGoogle from "../../components/SignInWithGoogle";
+import { POST_API } from "../../services/postApi";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -27,10 +29,18 @@ export default function SignIn() {
     };
     setCredintals(data);
   };
+
+  const navigate = useNavigate();
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const response = await POST_API({ url: "/users/login", credintals });
-    console.log(response);
+    const response = await POST_API("/users/login", credintals);
+    if (response.status) {
+      toast.success(response.message);
+      navigate("/dashboard");
+    } else {
+      toast.error(response.message);
+    }
   };
 
   return (

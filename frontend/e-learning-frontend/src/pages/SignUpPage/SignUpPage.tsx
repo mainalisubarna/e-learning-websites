@@ -1,4 +1,5 @@
-import * as React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -12,39 +13,36 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import SignInWithGoogle from "../components/SignInWithGoogle";
-
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import SignInWithGoogle from "../../components/SignInWithGoogle";
+import { POST_API } from "../../services/postApi";
+import { toast } from "react-toastify";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+  const [data, setData] = useState([]);
+  const handleChanges = (e: any) => {
+    const input: any = {
+      ...data,
+      [e.target.name]: e.target.value,
+    };
+    setData(input);
   };
+  console.log(data);
+  const navigate = useNavigate();
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const response = await POST_API("/users/register", data);
+    console.log(response);
+    if (response.status) {
+      toast.success(response.message);
+      navigate("/login");
+    } else {
+      toast.error(response.message);
+    }
+  };
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
@@ -79,6 +77,7 @@ export default function SignUp() {
                   id="firstName"
                   label="First Name"
                   autoFocus
+                  onChange={handleChanges}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -89,6 +88,7 @@ export default function SignUp() {
                   label="Last Name"
                   name="lastName"
                   autoComplete="family-name"
+                  onChange={handleChanges}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -99,6 +99,7 @@ export default function SignUp() {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
+                  onChange={handleChanges}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -110,6 +111,7 @@ export default function SignUp() {
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  onChange={handleChanges}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -132,7 +134,7 @@ export default function SignUp() {
             <SignInWithGoogle />
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/" variant="body2">
+                <Link href="/login" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>

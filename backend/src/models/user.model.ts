@@ -1,40 +1,27 @@
 import mongoose from "mongoose";
-// import bcrypt from "bcrypt";
-// import { NextFunction, Request, Response } from "express";
-const UserSchema = new mongoose.Schema(
+import UserInterface from "../interface/user.interface";
+import bcrypt from "bcrypt";
+
+const userSchema = new mongoose.Schema<UserInterface>(
   {
-    firstName: {
+    fullName: {
       type: String,
-      required: [true, "FIrst Name is a required field."],
-    },
-    lastName: {
-      type: String,
-      required: [true, "First Name is a required field."],
+      minLength: [5, "Minimum length for full name should be 5"],
     },
     email: {
       type: String,
-      required: [true, "Email is a required field."],
-      match: [/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/, "Email must be valid"],
-      unique: [true, "Email Must be unique"],
-    },
-    phoneNumber: {
-      type: String,
-      match: [/^(\+?977-?)?\d{10}$/, "Phone Number must be valid"],
-      unique: [true, "Phone Number Must be unique"],
-    },
-    role: {
-      type: String,
-      default: "student",
-      enum: ["student", "tutor"],
+      required: true,
+      unique: true,
     },
     password: {
       type: String,
-      match: [
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        "Minimum eight characters, at least one uppercase letter, one lowercase letter and one number",
-      ],
     },
-    enrolledCourses: {
+    roles: {
+      type: String,
+      enum: ["student", "instructor", "admin"],
+      default: "student",
+    },
+    enrolledCourse: {
       type: [
         {
           type: mongoose.Schema.Types.ObjectId,
@@ -42,17 +29,16 @@ const UserSchema = new mongoose.Schema(
         },
       ],
     },
-    picture: {
+    jwt: {
       type: String,
     },
-    jwt: String,
+    fcm: {
+      type: String,
+    },
     resetPasswordToken: {
       type: String,
     },
     resetPasswordExpire: {
-      type: Date,
-    },
-    passwordExpire: {
       type: Date,
     },
   },
@@ -61,7 +47,16 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-// UserSchema.pre("save", (req: Request, res: Response, next: NextFunction) => {});
+userSchema.pre("save", async function () {
+  const saltRound: any = Number(process.env.BCRYPT_SALT_ROUND);
+  const salt = await bcrypt.genSalt(saltRound);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
-const User = mongoose.model("User", UserSchema);
+userSchema.methods.matchPassword = async function (pass: any) {
+  return await bcrypt.compare(pass, this.password);
+};
+
+const User = mongoose.model<UserInterface>("User", userSchema);
+
 export default User;

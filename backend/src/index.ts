@@ -6,6 +6,7 @@ import ExpressMongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
 import helmet from "helmet";
 import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,6 +24,7 @@ app.listen(PORT, () => {
   console.log("App is running on Port " + PORT);
 });
 dbConnection();
+app.use(cors());
 app.use(morgan("tiny"));
 app.use(hpp());
 app.use(ExpressMongoSanitize());

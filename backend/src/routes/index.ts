@@ -13,7 +13,7 @@ router.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-router.get("/login/failed", (req: Request, res: Response) => {
+router.get("/auth/login/failed", (req: Request, res: Response) => {
   res.status(401).json({
     status: false,
     message: "Unauthorized User",
@@ -25,15 +25,20 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate("google", (err: any, user: any) => {
       if (err) {
-        res.redirect("/login/failed");
+        res.redirect("/auth/login/failed");
         next(err);
       }
       const secretKey: string = process.env.JWT_SECRET_KEY ?? "";
       const jwtToken = jwt.sign({ email: user["_json"].email }, secretKey, {
         expiresIn: "7d",
       });
+
       res.cookie("jwtToken", jwtToken);
       res.redirect(process.env.FRONT_END_URL + "/dashboard");
+      // res.status(200).json({
+      //   status: true,
+      //   message: "User Logged In successfully",
+      // });
     })(req, res, next);
   }
 );
