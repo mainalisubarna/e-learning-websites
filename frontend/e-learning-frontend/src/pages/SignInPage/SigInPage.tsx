@@ -13,9 +13,11 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SignInWithGoogle from "../../components/SignInWithGoogle";
-import { POST_API } from "../../services/postApi";
+import { POST_API } from "../../services/postApi.service";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login } from "./authSlice";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
@@ -31,15 +33,22 @@ export default function SignIn() {
   };
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const response = await POST_API("/users/login", credintals);
-    if (response.status) {
-      toast.success(response.message);
-      navigate("/dashboard");
+    const { email, password }: any = credintals;
+    if (email && password) {
+      const response = await POST_API("/users/login", credintals);
+      if (response.status) {
+        toast.success(response.message);
+        dispatch(login(response.data));
+        navigate("/dashboard");
+      } else {
+        toast.error(response.message);
+      }
     } else {
-      toast.error(response.message);
+      toast.warn("Please fill up the form properly");
     }
   };
 

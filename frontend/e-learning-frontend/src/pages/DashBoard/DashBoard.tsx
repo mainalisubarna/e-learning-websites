@@ -1,9 +1,9 @@
-import React from "react";
-
 const DashBoard = () => {
   return (
     <>
-      <div>Hello I am Dashboard</div>
+      <div className="ml-6 my-auto text-center text-lg text-red-900">
+        Hello I am Dashboard
+      </div>
     </>
   );
 };

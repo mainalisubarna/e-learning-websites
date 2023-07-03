@@ -11,8 +11,10 @@ const SignInWithGoogle = () => {
       onError={() => {
         console.log("Login Failed");
       }}
+      text="continue_with"
+      size="large"
       useOneTap
-      width="600"
+      width="400"
     />
   );
 };

@@ -4,13 +4,19 @@ import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema<UserInterface>(
   {
-    fullName: {
+    firstName: {
       type: String,
       minLength: [5, "Minimum length for full name should be 5"],
+      required: [true, "User Must enter First Name"],
+    },
+    lastName: {
+      type: String,
+      minLength: [5, "Minimum length for full name should be 5"],
+      required: [true, "User Must enter Last Name"],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is a required field"],
       unique: true,
     },
     password: {
@@ -48,9 +54,11 @@ const userSchema = new mongoose.Schema<UserInterface>(
 );
 
 userSchema.pre("save", async function () {
-  const saltRound: any = Number(process.env.BCRYPT_SALT_ROUND);
-  const salt = await bcrypt.genSalt(saltRound);
-  this.password = await bcrypt.hash(this.password, salt);
+  if (this.password) {
+    const saltRound: any = Number(process.env.BCRYPT_SALT_ROUND);
+    const salt = await bcrypt.genSalt(saltRound);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
 });
 
 userSchema.methods.matchPassword = async function (pass: any) {

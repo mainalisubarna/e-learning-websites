@@ -6,6 +6,7 @@ import Error from "./pages/PageNotFound/PageNotFound";
 import DashBoard from "./pages/DashBoard/DashBoard";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Sidebar from "./components/Sidebar";
 
 function App() {
   return (
@@ -14,7 +15,9 @@ function App() {
         <Route path="/" element={<SignIn />} />
         <Route path="/login" element={<SignIn />} />
         <Route path="/signUp" element={<SignUp />} />
-        <Route path="/dashboard" element={<DashBoard />}></Route>
+        <Route path="/" element={<Sidebar />}>
+          <Route path="dashboard" element={<DashBoard />}></Route>
+        </Route>
         <Route path="/*" element={<Error />} />
       </Routes>
       <ToastContainer

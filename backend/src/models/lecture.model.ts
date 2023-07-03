@@ -1,28 +1,32 @@
-import mongoose from 'mongoose';
-import LectureInteface from '../interface/lectures.interface';
+import mongoose from "mongoose";
+import LectureInteface from "../interface/lectures.interface";
 
 const lectureSchema = new mongoose.Schema<LectureInteface>(
-    {
-        title: {
-            type: String,
-            required: true
-        },
-        content: {
-            type: String,
-            required: true
-        },
-        duration: {
-            type: Number,
-            required: true
-        },
-        lectureUrl: {
-            type: String
-        }
-    }
-    , {
-        timestamps: true
-    })
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    content: {
+      type: String,
+      required: true,
+    },
+    duration: {
+      type: Number,
+      required: true,
+    },
+    lectureUrl: {
+      type: String,
+    },
+    photo_public_id: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const Lecture = mongoose.model<LectureInteface>('Lecture', lectureSchema);
+const Lecture = mongoose.model<LectureInteface>("Lecture", lectureSchema);
 
 export default Lecture;

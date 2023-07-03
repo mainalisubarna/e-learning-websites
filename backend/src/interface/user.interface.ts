@@ -1,7 +1,8 @@
 import mongoose, { Document } from "mongoose";
 
 interface UserInterface extends Document {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   roles: string;

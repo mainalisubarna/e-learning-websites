@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import SignInWithGoogle from "../../components/SignInWithGoogle";
-import { POST_API } from "../../services/postApi";
+import { POST_API } from "../../services/postApi.service";
 import { toast } from "react-toastify";
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -29,18 +29,21 @@ export default function SignUp() {
     };
     setData(input);
   };
-  console.log(data);
   const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const response = await POST_API("/users/register", data);
-    console.log(response);
-    if (response.status) {
-      toast.success(response.message);
-      navigate("/login");
+    const { email, password, firstName, lastName }: any = data;
+    if (email && password && firstName && lastName) {
+      const response = await POST_API("/users/register", data);
+      if (response.status) {
+        toast.success(response.message);
+        navigate("/login");
+      } else {
+        toast.error(response.message);
+      }
     } else {
-      toast.error(response.message);
+      toast.warn("Please fill up the form properly");
     }
   };
   return (

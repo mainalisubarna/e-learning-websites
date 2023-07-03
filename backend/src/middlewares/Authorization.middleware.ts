@@ -10,11 +10,8 @@ export const AuthenticateUser = async (
   try {
     if (req.headers && req.headers.authorization?.startsWith("Bearer ")) {
       const jwtToken = req.headers.authorization.split(" ")[1];
-      const userDetails: any = jwt.verify(
-        jwtToken,
-        process.env.JWT_SECRET_KEY ?? ""
-      );
-      const { email } = userDetails;
+      const user: any = jwt.verify(jwtToken, process.env.JWT_SECRET_KEY ?? "");
+      const { email } = user.details;
       const isUserValid = await User.findOne({ email });
       if (isUserValid) {
         req.user = isUserValid;

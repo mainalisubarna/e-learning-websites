@@ -33,7 +33,6 @@ export const processLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-
     if (!user) {
       return res.status(401).json({
         status: false,
@@ -43,7 +42,7 @@ export const processLogin = async (req: Request, res: Response) => {
       const matchedPassword = await user.matchPassword(password);
       if (matchedPassword) {
         const secretKey = process.env.JWT_SECRET_KEY ?? "";
-        const token = jwt.sign({ id: user.email }, secretKey, {
+        const token = jwt.sign({ details: user }, secretKey, {
           expiresIn: "7d",
         });
         const updatedUser: any = await User.findOneAndUpdate(
@@ -58,7 +57,7 @@ export const processLogin = async (req: Request, res: Response) => {
 
         return res.status(200).json({
           status: true,
-          data: updatedUser.jwt,
+          data: updatedUser,
           message: "User logged in successfully",
         });
       } else {
