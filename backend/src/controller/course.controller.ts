@@ -52,14 +52,20 @@ export const createCourses = async (req: any, res: Response) => {
         }
 
         lecture.lectureUrl = result.secure_url;
+        lecture.photo_public_id = result.public_id;
 
         await lecture.save();
 
         section.lectures.push(lecture._id);
 
-        const fileName = "../../public/Uploads/" + result.original_filename;
+        const fileName =
+          "./public/Uploads/" + result.original_filename + "." + result.format;
 
-        fs.unlink(fileName);
+        fs.unlink(fileName, (err: any) => {
+          if (err) {
+            console.log(err);
+          }
+        });
       }
       await section.save();
 
@@ -68,16 +74,15 @@ export const createCourses = async (req: any, res: Response) => {
 
     await course.save();
 
-    return res.status(201).json({
+    return res.status(200).json({
       status: true,
       message: "Course created successfully",
       data: course,
     });
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({
       status: false,
-      message: "An error occured while creating this course",
-      error,
+      message: error.message,
     });
   }
 };
